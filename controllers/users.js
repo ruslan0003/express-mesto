@@ -8,7 +8,8 @@ const getUsers = (req, res) => {
     res.send(data);
   })
     .catch((err) => {
-      res.send(err);
+      console.error('err = ', err.message);
+      res.status(500).send({ message: 'Ошибка на сервере' });
     });
 };
 
