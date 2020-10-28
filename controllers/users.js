@@ -1,16 +1,13 @@
 const path = require('path');
 const readFile = require('../utils/read-file');
+const User = require('../models/user');
 
 const usersDataPath = path.join(__dirname, '..', 'data', 'users.json');
 
 const getUsers = (req, res) => {
-  readFile(usersDataPath).then((data) => {
-    res.send(data);
-  })
-    .catch((err) => {
-      console.error('err = ', err.message);
-      res.status(500).send({ message: 'Ошибка на сервере' });
-    });
+  User.find({})
+    .then((users) => res.status(200).send(users))
+    .catch((err) => res.status(400).send(err));
 };
 
 const getUser = (req, res) => {
@@ -32,7 +29,18 @@ const getUser = (req, res) => {
     });
 };
 
+const createUser = (req, res) => {
+  const { name, about, avatar } = req.body;
+  User.create({ name, about, avatar })
+    .then((user) => res.send({ data: user }))
+    .catch((err) => {
+      console.error('err = ', err.message);
+      res.status(500).send({ message: 'Ошибка на сервере' });
+    });
+};
+
 module.exports = {
   getUsers,
   getUser,
+  createUser,
 };
