@@ -1,8 +1,4 @@
-const path = require('path');
-const readFile = require('../utils/read-file');
 const User = require('../models/user');
-
-const usersDataPath = path.join(__dirname, '..', 'data', 'users.json');
 
 const getUsers = (req, res) => {
   User.find({})
@@ -11,17 +7,12 @@ const getUsers = (req, res) => {
 };
 
 const getUser = (req, res) => {
-  const { id } = req.params;
-  readFile(usersDataPath)
-    .then((data) => {
-      const userToFind = data.find((user) => user._id === id);
-      return userToFind;
-    })
+  User.findOne(req.params.userId)
     .then((user) => {
       if (!user) {
         return res.status(404).send({ message: 'Нет пользователя с таким id' });
       }
-      return res.send(user);
+      return res.status(200).send(user);
     })
     .catch((err) => {
       console.error('err = ', err.message);

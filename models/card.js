@@ -13,21 +13,23 @@ const cardSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator(v) {
-        return /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/ig.test(v);
+        return /(https?:\/\/(www\.)?[a-zA-Z0-9-]+\.\S+#?$)/ig.test(v);
       },
       message: (props) => `${props.value} не является корректной ссылкой`,
     },
   },
 
   owner: {
-    type: mongoose.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
     required: true,
   },
 
-  likes: {
-    type: mongoose.Types.ObjectId,
+  likes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
     default: [],
-  },
+  }],
 
   createdAt: {
     type: Date,
