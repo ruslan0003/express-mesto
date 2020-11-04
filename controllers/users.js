@@ -7,16 +7,17 @@ const getUsers = (req, res) => {
 };
 
 const getUser = (req, res) => {
-  User.findOne(req.params.userId)
-    .then((user) => {
-      if (!user) {
-        return res.status(404).send({ message: 'Нет пользователя с таким id' });
-      }
-      return res.status(200).send(user);
-    })
+  User.findOne({ _id: req.params.userId })
+    .orFail(() => new Error('NotFound'))
+    .then((user) => res.send(user))
     .catch((err) => {
-      console.error('err = ', err.message);
-      res.status(500).send({ message: 'Ошибка на сервере' });
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else if (err.message === 'NotFound') {
+        res.status(404).send({ message: 'Пользователь не найден' });
+      } else {
+        res.status(500).send({ message: 'Ошибка сервера' });
+      }
     });
 };
 
@@ -25,8 +26,13 @@ const createUser = (req, res) => {
   User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      console.error('err = ', err.message);
-      res.status(500).send({ message: 'Ошибка на сервере' });
+      if (err.name === 'ValidationError') {
+        console.error(err.name, '=', err.message);
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else {
+        console.error('err =', err.message);
+        res.status(500).send({ message: 'Ошибка на сервере' });
+      }
     });
 };
 

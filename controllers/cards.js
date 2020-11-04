@@ -12,17 +12,24 @@ const createCard = (req, res) => {
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
-      console.error('err = ', err.message);
-      res.status(500).send({ message: 'Ошибка на сервере' });
+      if (err.name === 'ValidationError') {
+        console.error(err.name, '=', err.message);
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else {
+        console.error('err =', err.message);
+        res.status(500).send({ message: 'Ошибка на сервере' });
+      }
     });
 };
 
 const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findByIdAndRemove({ _id: req.params.cardId })
     .orFail(new Error('NotValidId'))
     .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
-      if (err.message === 'NotValidId') {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else if (err.message === 'NotValidId') {
         console.error('err = ', err.message);
         res.status(404).send({ message: 'Карточка с таким id не найдена в базе' });
       } else {
